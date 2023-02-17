@@ -1,0 +1,10 @@
+name: napari-ui-tracer
+display_name: Napari UI tracer
+contributions:
+  commands:
+    - id: napari-ui-tracer.make_qwidget
+      python_name: napari_ui_tracer._widget:QtNapariUITracer
+      title: Make Napari UI tracer widget
+  widgets:
+    - command: napari-ui-tracer.make_qwidget
+      display_name: Napari UI tracer widget
