@@ -8,7 +8,7 @@ import inspect
 
 from qtpy.QtCore import Qt, QEvent, QUrl
 from qtpy.QtGui import QDesktopServices
-from qtpy.QtWidgets import QApplication, QHBoxLayout, QVBoxLayout, QPushButton, QTextBrowser, QWidget
+from qtpy.QtWidgets import QApplication, QCheckBox, QHBoxLayout, QVBoxLayout, QPushButton, QTextBrowser, QWidget
 
 
 class QtNapariUITracer(QWidget):
@@ -17,6 +17,9 @@ class QtNapariUITracer(QWidget):
 
     def __init__(self):
         super().__init__()
+
+        # Checkbox
+        self.cb_object_doc = QCheckBox("Show object documentation")
 
         # Buttons
         self.btn_install = QPushButton("Install event filter")
@@ -41,6 +44,7 @@ class QtNapariUITracer(QWidget):
         # Layout
         self.setLayout(QVBoxLayout())
         self.layout().addLayout(btn_layout)
+        self.layout().addWidget(self.cb_object_doc)
         self.layout().addWidget(self.output)
 
     def _on_install(self):
@@ -91,13 +95,18 @@ class QtNapariUITracer(QWidget):
                     qobject_module = inspect.getmodule(qobject)
                     try:
                         is_html = True
-                        qobject_module_string = str(qobject_module).replace("<", "&#60;").replace(">", "&#62;")
-                        qobject_module_file = inspect.getfile(qobject_module)
+                        qobject_module_string = str(qobject_module).replace(
+                            "<", "&#60;").replace(">", "&#62;")
+                        qobject_module_file = inspect.getsourcefile(
+                            qobject_module)
                         qobject_module_link = f'Module: <a href="{qobject_module_file}">{qobject_module_string}</a>'
                     except AttributeError:
                         is_html = False
                         qobject_module_link = qobject_module
                     qobject_info = f"Object: {qobject}\nClass: {qobject.__class__}"
+                    qobject_doc = inspect.getdoc(qobject)
+                    if qobject_doc and self.cb_object_doc.isChecked():
+                        qobject_info = f"Object: {qobject}\nClass: {qobject.__class__}\nDoc: {qobject_doc}"
                     if any(
                         match in qobject_class
                         for match in start_qobject_paths
