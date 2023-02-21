@@ -1,36 +1,43 @@
-import numpy as np
+from qtpy.QtCore import Qt
 
-from napari_ui_tracer import ExampleQWidget, example_magic_widget
+from napari_ui_tracer import QtNapariUITracer
 
 
-# make_napari_viewer is a pytest fixture that returns a napari viewer object
-# capsys is a pytest fixture that captures stdout and stderr output streams
-def test_example_q_widget(make_napari_viewer, capsys):
-    # make viewer and add an image layer using our fixture
+def test_qt_napari_ui_tracer(make_napari_viewer, qtbot):
+    # make viewer
     viewer = make_napari_viewer()
-    viewer.add_image(np.random.random((100, 100)))
+    qt_viewer = viewer.window._qt_viewer
+
+    with qtbot.waitExposed(qt_viewer):
+        viewer.show()
 
     # create our widget, passing in the viewer
-    my_widget = ExampleQWidget(viewer)
+    widget = QtNapariUITracer()
 
-    # call our widget method
-    my_widget._on_click()
+    # call eventFilter install
+    widget._on_install()
+    assert not widget.btn_install.isEnabled()
+    assert widget.btn_uninstall.isEnabled()
 
-    # read captured output and check that it's as we expected
-    captured = capsys.readouterr()
-    assert captured.out == "napari has 1 layers\n"
-
-
-def test_example_magic_widget(make_napari_viewer, capsys):
-    viewer = make_napari_viewer()
-    layer = viewer.add_image(np.random.random((100, 100)))
-
-    # this time, our widget will be a MagicFactory or FunctionGui instance
-    my_widget = example_magic_widget()
-
-    # if we "call" this object, it'll execute our function
-    my_widget(viewer.layers[0])
+    # interact with viewer to see if event is captured
+    qtbot.mouseClick(qt_viewer, Qt.RightButton,
+                     modifier=Qt.ControlModifier)
 
     # read captured output and check that it's as we expected
-    captured = capsys.readouterr()
-    assert captured.out == f"you have selected {layer}\n"
+    captured = widget.output.toPlainText()
+    assert "QtViewer" in captured
+    assert "QWidget" in captured
+    assert "_QtMainWindow" in captured
+
+    # call clear output and check that output is clear
+    widget._on_clear()
+    assert widget.output.toPlainText() == ""
+
+    # call eventFilter uninstall
+    widget._on_uninstall()
+
+    # interact with viewer to see if event is captured
+    qtbot.mouseClick(qt_viewer, Qt.RightButton,
+                     modifier=Qt.ControlModifier)
+
+    assert widget.output.toPlainText() == ""
