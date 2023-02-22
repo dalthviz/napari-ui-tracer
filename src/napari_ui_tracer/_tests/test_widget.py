@@ -44,3 +44,10 @@ def test_qt_napari_ui_tracer(make_napari_viewer, qtbot):
     qtbot.mouseClick(qt_viewer, Qt.RightButton, Qt.ControlModifier)
 
     assert widget.output.toPlainText() == ""
+
+    # interact with doc option enabled
+    widget._on_install()
+    widget.cb_object_doc.setChecked(True)
+    qtbot.mouseClick(qt_viewer, Qt.RightButton, Qt.ControlModifier)
+    captured_doc = widget.output.toPlainText()
+    assert "Qt view for the napari Viewer model." in captured_doc

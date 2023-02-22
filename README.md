@@ -13,17 +13,11 @@ A plugin to help understand Napari UI components and locate their code definitio
 
 This [napari] plugin was generated with [Cookiecutter] using [@napari]'s [cookiecutter-napari-plugin] template.
 
-<!--
-Don't miss the full getting started guide to set up your new package:
-https://github.com/napari/cookiecutter-napari-plugin#getting-started
-
-and review the napari docs for plugin developers:
-https://napari.org/stable/plugins/index.html
--->
+![GIF showing Napari UI tracer's functionality](https://raw.githubusercontent.com/dalthviz/napari-ui-tracer/main/images/napari-ui-tracer.gif)
 
 ## Installation
 
-You can install `napari-ui-tracer` via [pip]:
+You can install `napari-ui-tracer` via [pip] (**Not available yet**):
 
     pip install napari-ui-tracer
 
@@ -34,9 +28,26 @@ To install latest development version :
     pip install git+https://github.com/dalthviz/napari-ui-tracer.git
 
 
+## Usage
+
+1. Show the plugin inside the napari interface:
+
+    * You can launch napari with the plugin visible running:
+
+            napari -w napari-ui-tracer
+
+    * Or select it from `Plugins > Napari UI tracer widget`
+
+2. Click the `Install EventFilter` button:
+    * Also and option to show object documentation if available can be used by checking the `Show object documentation` checkbox
+
+3. Use `Ctrl/Cmd + Mouse button right click` to see the information available about any widget inside napari
+
+4. If you want to explore the related module source file, click the link in the output section of the plugin
+
 ## Contributing
 
-Contributions are very welcome. Tests can be run with [tox], please ensure
+Contributions are very welcome. Pre-commit is used for formatting. Tests can be run with [tox], please ensure
 the coverage at least stays the same before you submit a pull request.
 
 ## License

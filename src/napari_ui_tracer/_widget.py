@@ -87,9 +87,6 @@ class QtNapariUITracer(QWidget):
             url = QUrl.fromLocalFile(url.toString())
         QDesktopServices.openUrl(url)
 
-    def _handle_object_info(self, qobject):
-        pass
-
     def eventFilter(self, qobject, qevent):
         if Qt.ControlModifier == QApplication.keyboardModifiers():
             if qevent.type() == QEvent.Type.MouseButtonPress:
