@@ -23,7 +23,6 @@ from qtpy.QtWidgets import (
 
 
 class QtNapariUITracer(QWidget):
-
     TEXT_DIVIDER = "--------\n"
 
     def __init__(self):
