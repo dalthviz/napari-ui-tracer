@@ -1,5 +1,5 @@
 """
-Widget to show information of the Napari widgets classes and lcode location.
+Widget to show information of the Napari widgets classes and module location.
 
 Uses `Ctrl + Mouse right button press`/`Cmd + Mouse right button press`
 to trigger the tracing when the event filter is installed.
@@ -10,7 +10,7 @@ from pathlib import Path
 
 # Third-party imports
 from qtpy.QtCore import Qt, QEvent, QUrl
-from qtpy.QtGui import QDesktopServices
+from qtpy.QtGui import QDesktopServices, QTextCursor
 from qtpy.QtWidgets import (
     QApplication,
     QCheckBox,
@@ -75,6 +75,9 @@ class QtNapariUITracer(QWidget):
         self.output.clear()
 
     def _append_output(self, text, alignment=Qt.AlignLeft, is_html=False):
+        cursor = self.output.textCursor()
+        cursor.movePosition(QTextCursor.End)
+        self.output.setTextCursor(cursor)
         if is_html:
             self.output.setAlignment(alignment)
             self.output.insertHtml("<div>{0}</div><br>".format(text))
