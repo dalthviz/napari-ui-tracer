@@ -7,6 +7,7 @@ to trigger the tracing when the event filter is installed.
 # Standard library imports
 import inspect
 from pathlib import Path
+from textwrap import indent
 
 # Third-party imports
 from qtpy.QtCore import Qt, QEvent, QUrl
@@ -21,6 +22,11 @@ from qtpy.QtWidgets import (
     QWidget,
 )
 
+# napari imports
+import napari.utils.events.event as events
+from napari.utils.events.event import _noop
+from napari.utils.events.debugging import _shorten_fname, _SETTINGS
+
 
 class QtNapariUITracer(QWidget):
     TEXT_DIVIDER = "--------\n"
@@ -30,6 +36,8 @@ class QtNapariUITracer(QWidget):
 
         # Checkbox
         self.cb_object_doc = QCheckBox("Show object documentation")
+        self.cb_debug_events = QCheckBox("Debug application events")
+        self.cb_debug_events.toggled.connect(self._on_log_debug_events)
 
         # Buttons
         self.btn_install = QPushButton("Install event filter")
@@ -55,6 +63,7 @@ class QtNapariUITracer(QWidget):
         self.setLayout(QVBoxLayout())
         self.layout().addLayout(btn_layout)
         self.layout().addWidget(self.cb_object_doc)
+        self.layout().addWidget(self.cb_debug_events)
         self.layout().addWidget(self.output)
 
     def _on_install(self):
@@ -85,10 +94,93 @@ class QtNapariUITracer(QWidget):
             self.output.setAlignment(alignment)
             self.output.insertPlainText(text)
 
+    def _append_event_output(
+        self, text, alignment=Qt.AlignLeft, is_html=False
+    ):
+        cursor = self.output.textCursor()
+        cursor.movePosition(QTextCursor.End)
+        self.output.setTextCursor(cursor)
+        if is_html:
+            self.output.setAlignment(alignment)
+            self.output.insertHtml("<div>{0}</div><br>".format(text))
+        else:
+            self.output.setAlignment(alignment)
+            self.output.insertPlainText(text)
+
     def _handle_file_link(self, url):
         if not url.scheme():
             url = QUrl.fromLocalFile(url.toString())
         QDesktopServices.openUrl(url)
+
+    def _on_log_debug_events(self, enabled):
+        def _handle_debug_event_output(event, cfg=_SETTINGS):
+            """Print info about what caused this event to be emitted.s"""
+            print(event)
+            if cfg.include_events:
+                if event.type not in cfg.include_events:
+                    return
+            elif event.type in cfg.exclude_events:
+                return
+
+            source = type(event.source).__name__
+            if cfg.include_emitters:
+                if source not in cfg.include_emitters:
+                    return
+            elif source in cfg.exclude_emitters:
+                return
+
+            # get values being emitted
+            vals = ",".join(f"{k}={v}" for k, v in event._kwargs.items())
+            # show event type and source
+            lines = [f"{source}.events.{event.type}({vals})"]
+            # climb stack and show what caused it.
+            # note, we start 2 frames back in the stack, one frame for *this* function
+            # and the second frame for the EventEmitter.__call__ function (where this
+            # function was likely called).
+            call_stack = inspect.stack(0)
+            for frame in call_stack[2 : 2 + cfg.stack_depth]:
+                fname = _shorten_fname(frame.filename)
+                obj = ""
+                if "self" in frame.frame.f_locals:
+                    obj = type(frame.frame.f_locals["self"]).__name__ + "."
+                ln = f'  "{fname}", line {frame.lineno}, in {obj}{frame.function}'
+                lines.append(ln)
+            lines.append("")
+
+            # find the first caller in the call stack
+            for f in reversed(call_stack):
+                if "self" in f.frame.f_locals:
+                    obj_type = type(f.frame.f_locals["self"])
+                    module = obj_type.__module__ or ""
+                    if module.startswith("napari"):
+                        trigger = f"{obj_type.__name__}.{f.function}()"
+                        lines.insert(1, f"  was triggered by {trigger}, via:")
+                        break
+
+            # seperate groups of events
+            if not cfg._cur_depth:
+                lines = ["─" * 79, ""] + lines
+            elif not cfg.nesting_allowance:
+                return
+
+            # log it
+            self._append_event_output(
+                indent("\n".join(lines), "  " * cfg._cur_depth)
+            )
+
+            # spy on nested events...
+            # (i.e. events that were emitted while another was being emitted)
+            def _pop_source():
+                cfg._cur_depth -= 1
+                return event._sources.pop()
+
+            event._pop_source = _pop_source
+            cfg._cur_depth += 1
+
+        if enabled:
+            events._log_event_stack = _handle_debug_event_output
+        else:
+            events._log_event_stack = _noop
 
     def eventFilter(self, qobject, qevent):
         if Qt.ControlModifier == QApplication.keyboardModifiers():
