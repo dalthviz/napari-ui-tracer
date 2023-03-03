@@ -15,10 +15,14 @@ from qtpy.QtGui import QDesktopServices, QTextCursor
 from qtpy.QtWidgets import (
     QApplication,
     QCheckBox,
+    QGridLayout,
+    QGroupBox,
     QHBoxLayout,
-    QVBoxLayout,
+    QLabel,
     QPushButton,
+    QSpinBox,
     QTextBrowser,
+    QVBoxLayout,
     QWidget,
 )
 
@@ -34,24 +38,69 @@ class QtNapariUITracer(QWidget):
     def __init__(self):
         super().__init__()
 
-        # Checkbox
+        # Settings
+        self._debug_event_settings = _SETTINGS
+
+        # Checkboxes
+        self.cb_event_filter = QGroupBox("Use Qt event filter")
+        self.cb_event_filter.setCheckable(True)
+        self.cb_event_filter.setChecked(False)
+        self.cb_event_filter.setToolTip(
+            "Use Ctrl/Cmd + Mouse Right click to check UI object instance and related modules"
+        )
+        self.cb_event_filter.toggled.connect(self._on_event_filter)
         self.cb_object_doc = QCheckBox("Show object documentation")
-        self.cb_debug_events = QCheckBox("Debug application events")
+        self.cb_object_doc.setToolTip(
+            "Define if documentation (if available) for clicked objects should be shown"
+        )
+        group_box_layout = QHBoxLayout()
+        # Show docs
+        group_box_layout.addWidget(self.cb_object_doc)
+        self.cb_event_filter.setLayout(group_box_layout)
+
+        self.cb_debug_events = QGroupBox("Debug application events")
+        self.cb_debug_events.setCheckable(True)
+        self.cb_debug_events.setChecked(False)
+        self.cb_debug_events.setToolTip("Enable application events logging")
         self.cb_debug_events.toggled.connect(self._on_log_debug_events)
+        # Stack depth
+        self.label_stack_depth = QLabel("Stack depth:")
+        self.sb_stack_depth = QSpinBox()
+        self.sb_stack_depth.setRange(1, 50)
+        self.sb_stack_depth.setValue(self._debug_event_settings.stack_depth)
+        self.sb_stack_depth.setToolTip("Stack depth to show")
+        self.sb_stack_depth.valueChanged.connect(self._on_stack_depth_changed)
+        # Nesting allowance
+        self.label_nesting_allowance = QLabel("Allowed nested events:")
+        self.sb_nesting_allowance = QSpinBox()
+        self.sb_nesting_allowance.setRange(0, 5)
+        self.sb_nesting_allowance.setValue(
+            self._debug_event_settings.nesting_allowance
+        )
+        self.sb_nesting_allowance.setToolTip(
+            "How many sub-emit nesting levels to show (i.e. events that get triggered by other events)"
+        )
+        self.sb_nesting_allowance.valueChanged.connect(
+            self._on_nesting_allowance_changed
+        )
+        group_box_debug_events_layout = QGridLayout()
+        group_box_debug_events_layout.addWidget(self.label_stack_depth, 0, 0)
+        group_box_debug_events_layout.addWidget(self.sb_stack_depth, 0, 1)
+        group_box_debug_events_layout.addWidget(
+            self.label_nesting_allowance, 1, 0
+        )
+        group_box_debug_events_layout.addWidget(
+            self.sb_nesting_allowance, 1, 1
+        )
+        self.cb_debug_events.setLayout(group_box_debug_events_layout)
 
         # Buttons
-        self.btn_install = QPushButton("Install event filter")
-        self.btn_install.clicked.connect(self._on_install)
-        self.btn_uninstall = QPushButton("Uninstall event filter")
-        self.btn_uninstall.clicked.connect(self._on_uninstall)
-        self.btn_uninstall.setEnabled(False)
-        self.btn_clear = QPushButton("Clear")
+        self.btn_clear = QPushButton("Clear output")
+        self.btn_clear.setToolTip("Clear output area")
         self.btn_clear.clicked.connect(self._on_clear)
 
         # Buttons layout
         btn_layout = QHBoxLayout()
-        btn_layout.addWidget(self.btn_install)
-        btn_layout.addWidget(self.btn_uninstall)
         btn_layout.addWidget(self.btn_clear)
 
         # TextBrowser
@@ -61,42 +110,23 @@ class QtNapariUITracer(QWidget):
 
         # Layout
         self.setLayout(QVBoxLayout())
-        self.layout().addLayout(btn_layout)
-        self.layout().addWidget(self.cb_object_doc)
+        self.layout().addWidget(self.cb_event_filter)
         self.layout().addWidget(self.cb_debug_events)
+        self.layout().addLayout(btn_layout)
         self.layout().addWidget(self.output)
 
-    def _on_install(self):
+    def _on_event_filter(self, enabled):
         qapp = QApplication.instance()
         if qapp:
-            qapp.installEventFilter(self)
-            self.btn_install.setEnabled(False)
-            self.btn_uninstall.setEnabled(True)
-
-    def _on_uninstall(self):
-        qapp = QApplication.instance()
-        if qapp:
-            qapp.removeEventFilter(self)
-            self.btn_install.setEnabled(True)
-            self.btn_uninstall.setEnabled(False)
+            if enabled:
+                qapp.installEventFilter(self)
+            else:
+                qapp.removeEventFilter(self)
 
     def _on_clear(self):
         self.output.clear()
 
     def _append_output(self, text, alignment=Qt.AlignLeft, is_html=False):
-        cursor = self.output.textCursor()
-        cursor.movePosition(QTextCursor.End)
-        self.output.setTextCursor(cursor)
-        if is_html:
-            self.output.setAlignment(alignment)
-            self.output.insertHtml("<div>{0}</div><br>".format(text))
-        else:
-            self.output.setAlignment(alignment)
-            self.output.insertPlainText(text)
-
-    def _append_event_output(
-        self, text, alignment=Qt.AlignLeft, is_html=False
-    ):
         cursor = self.output.textCursor()
         cursor.movePosition(QTextCursor.End)
         self.output.setTextCursor(cursor)
@@ -113,9 +143,9 @@ class QtNapariUITracer(QWidget):
         QDesktopServices.openUrl(url)
 
     def _on_log_debug_events(self, enabled):
-        def _handle_debug_event_output(event, cfg=_SETTINGS):
-            """Print info about what caused this event to be emitted.s"""
-            print(event)
+        def _handle_debug_event_output(event, cfg=self._debug_event_settings):
+            """Print info about what caused this event to be emitted."""
+            cfg = _SETTINGS
             if cfg.include_events:
                 if event.type not in cfg.include_events:
                     return
@@ -143,8 +173,9 @@ class QtNapariUITracer(QWidget):
                 obj = ""
                 if "self" in frame.frame.f_locals:
                     obj = type(frame.frame.f_locals["self"]).__name__ + "."
-                ln = f'  "{fname}", line {frame.lineno}, in {obj}{frame.function}'
-                lines.append(ln)
+                if obj:
+                    ln = f'  <a href="{frame.filename}">"{fname}", line {frame.lineno}, in {obj}{frame.function}</a>'
+                    lines.append(ln)
             lines.append("")
 
             # find the first caller in the call stack
@@ -157,15 +188,19 @@ class QtNapariUITracer(QWidget):
                         lines.insert(1, f"  was triggered by {trigger}, via:")
                         break
 
-            # seperate groups of events
-            if not cfg._cur_depth:
-                lines = ["─" * 79, ""] + lines
+            # separate groups of events
+            if cfg._cur_depth <= 0:
+                cfg._cur_depth = 0
+                self._append_output(
+                    self.TEXT_DIVIDER, alignment=Qt.AlignCenter
+                )
             elif not cfg.nesting_allowance:
                 return
 
             # log it
-            self._append_event_output(
-                indent("\n".join(lines), "  " * cfg._cur_depth)
+            output = indent("<br>".join(lines), "  " * cfg._cur_depth)
+            self._append_output(
+                f"<pre>{output}</pre>", alignment=Qt.AlignLeft, is_html=True
             )
 
             # spy on nested events...
@@ -182,22 +217,32 @@ class QtNapariUITracer(QWidget):
         else:
             events._log_event_stack = _noop
 
+    def _on_stack_depth_changed(self, depth):
+        self._debug_event_settings.stack_depth = depth
+
+    def _on_nesting_allowance_changed(self, nesting_allowance):
+        self._debug_event_settings.nesting_allowance = nesting_allowance
+
     def eventFilter(self, qobject, qevent):
         if Qt.ControlModifier == QApplication.keyboardModifiers():
             if qevent.type() == QEvent.Type.MouseButtonPress:
                 if qevent.buttons() == Qt.RightButton:
-                    qobject_class = str(qobject.__class__)
+                    qobject_string = (
+                        str(qobject)
+                        .replace("<", "&#60;")
+                        .replace(">", "&#62;")
+                    )
+                    qobject_class = (
+                        str(qobject.__class__)
+                        .replace("<", "&#60;")
+                        .replace(">", "&#62;")
+                    )
                     start_qobject_paths = ["QtGui.QWindow"]
-                    end_qobject_paths = [
-                        "napari._qt.qt_main_window",
-                        "napari._qt.dialogs",
-                        "app_model.backends.qt._qmenu.QModelMenu",
-                        "napari._qt.menus",
-                    ]
                     qobject_module = inspect.getmodule(qobject)
                     if qobject_module:
-                        is_html = False
-                        qobject_module_link = f"Module: {qobject_module}\n\n"
+                        qobject_module_link = f"{qobject_module}".replace(
+                            "<", "&#60;"
+                        ).replace(">", "&#62;")
                         try:
                             qobject_module_string = (
                                 str(qobject_module)
@@ -211,16 +256,16 @@ class QtNapariUITracer(QWidget):
                                 qobject_module_file = Path(
                                     qobject_module_file
                                 ).as_uri()
-                                qobject_module_link = f'Module: <a href="{qobject_module_file}">{qobject_module_string}</a>'
-                                is_html = True
+                                qobject_module_link = f'<a href="{qobject_module_file}">{qobject_module_string}</a>'
                         except TypeError:
                             pass
-                        qobject_info = (
-                            f"Object: {qobject}\nClass: {qobject.__class__}\n"
-                        )
+                        qobject_info = f"Object: {qobject_string}<br>  Class: {qobject_class}<br>  Module: {qobject_module_link}"
                         qobject_doc = inspect.getdoc(qobject)
                         if qobject_doc and self.cb_object_doc.isChecked():
-                            qobject_info = f"Object: {qobject}\nClass: {qobject.__class__}\nDoc: {qobject_doc}\n"
+                            qobject_doc = qobject_doc.replace(
+                                "<", "&#60;"
+                            ).replace(">", "&#62;")
+                            qobject_info = f"Object: {qobject_string}<br>  Class: {qobject_class}<br>  Doc: {qobject_doc}<br>  Module: {qobject_module_link}"
                         if any(
                             match in qobject_class
                             for match in start_qobject_paths
@@ -228,21 +273,10 @@ class QtNapariUITracer(QWidget):
                             self._append_output(
                                 self.TEXT_DIVIDER, alignment=Qt.AlignCenter
                             )
-                        elif any(
-                            match in qobject_class
-                            for match in end_qobject_paths
-                        ):
-                            self._append_output(qobject_info)
-                            self._append_output(
-                                qobject_module_link, is_html=is_html
-                            )
-                            self._append_output(
-                                self.TEXT_DIVIDER, alignment=Qt.AlignCenter
-                            )
                         else:
-                            self._append_output(qobject_info)
                             self._append_output(
-                                qobject_module_link, is_html=is_html
+                                indent(f"<pre>{qobject_info}</pre>", "  "),
+                                is_html=True,
                             )
 
                     qevent.ignore()
