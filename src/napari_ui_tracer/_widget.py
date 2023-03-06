@@ -42,11 +42,11 @@ class QtNapariUITracer(QWidget):
         self._debug_event_settings = _SETTINGS
 
         # Checkboxes
-        self.cb_event_filter = QGroupBox("Use Qt event filter")
+        self.cb_event_filter = QGroupBox("Enable Qt event filter")
         self.cb_event_filter.setCheckable(True)
         self.cb_event_filter.setChecked(False)
         self.cb_event_filter.setToolTip(
-            "Use Ctrl/Cmd + Mouse Right click to check UI object instance and related modules"
+            "Use Ctrl/Cmd + Mouse Right click to check UI object instance and related modules when active"
         )
         self.cb_event_filter.toggled.connect(self._on_event_filter)
         self.cb_object_doc = QCheckBox("Show object documentation")
@@ -58,10 +58,12 @@ class QtNapariUITracer(QWidget):
         group_box_layout.addWidget(self.cb_object_doc)
         self.cb_event_filter.setLayout(group_box_layout)
 
-        self.cb_debug_events = QGroupBox("Debug application events")
+        self.cb_debug_events = QGroupBox("Enable application events logging")
         self.cb_debug_events.setCheckable(True)
         self.cb_debug_events.setChecked(False)
-        self.cb_debug_events.setToolTip("Enable application events logging")
+        self.cb_debug_events.setToolTip(
+            "Show application events logging when active"
+        )
         self.cb_debug_events.toggled.connect(self._on_log_debug_events)
         # Stack depth
         self.label_stack_depth = QLabel("Stack depth:")
