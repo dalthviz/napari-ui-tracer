@@ -147,7 +147,6 @@ class QtNapariUITracer(QWidget):
     def _on_log_debug_events(self, enabled):
         def _handle_debug_event_output(event, cfg=self._debug_event_settings):
             """Print info about what caused this event to be emitted."""
-            cfg = _SETTINGS
             if cfg.include_events:
                 if event.type not in cfg.include_events:
                     return
