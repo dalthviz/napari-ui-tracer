@@ -1,3 +1,6 @@
+import sys
+
+import pytest
 from qtpy.QtCore import Qt
 
 from napari_ui_tracer import QtNapariUITracer
@@ -54,6 +57,9 @@ def test_qt_event_filter(make_napari_viewer, qtbot):
     assert "Qt view for the napari Viewer model." in captured_doc
 
 
+@pytest.mark.skipif(
+    sys.platform != "darwin", reason="Only works on macOS. See QTBUG-5232"
+)
 def test_application_events_logging(make_napari_viewer, qtbot):
     """
     Test logging events and logging config functionality.
@@ -75,20 +81,20 @@ def test_application_events_logging(make_napari_viewer, qtbot):
 
     # move mouse to viewer
     qtbot.mouseMove(qt_viewer)
-    qtbot.waitUntil(lambda: "_enter_canvas" in widget.output.toPlainText())
+    assert "_enter_canvas" in widget.output.toPlainText()
     assert "enterEvent" in widget.output.toPlainText()
     widget._on_clear()
 
     # move mouse out of viewer
     qtbot.mouseMove(widget)
-    qtbot.waitUntil(lambda: "_leave_canvas" in widget.output.toPlainText())
+    assert "_leave_canvas" in widget.output.toPlainText()
     assert "leaveEvent" in widget.output.toPlainText()
     widget._on_clear()
 
     # set stack_depth to 1 and move mouse to viewer again
     widget.sb_stack_depth.setValue(1)
     qtbot.mouseMove(qt_viewer)
-    qtbot.waitUntil(lambda: "_enter_canvas" not in widget.output.toPlainText())
+    assert "_enter_canvas" not in widget.output.toPlainText()
     assert "enterEvent" in widget.output.toPlainText()
     widget._on_clear()
 
