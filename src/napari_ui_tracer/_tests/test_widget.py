@@ -75,20 +75,20 @@ def test_application_events_logging(make_napari_viewer, qtbot):
 
     # move mouse to viewer
     qtbot.mouseMove(qt_viewer)
-    assert "_enter_canvas" in widget.output.toPlainText()
+    qtbot.waitUntil(lambda: "_enter_canvas" in widget.output.toPlainText())
     assert "enterEvent" in widget.output.toPlainText()
     widget._on_clear()
 
     # move mouse out of viewer
     qtbot.mouseMove(widget)
-    assert "_leave_canvas" in widget.output.toPlainText()
+    qtbot.waitUntil(lambda: "_leave_canvas" in widget.output.toPlainText())
     assert "leaveEvent" in widget.output.toPlainText()
     widget._on_clear()
 
     # set stack_depth to 1 and move mouse to viewer again
     widget.sb_stack_depth.setValue(1)
     qtbot.mouseMove(qt_viewer)
-    assert "_enter_canvas" not in widget.output.toPlainText()
+    qtbot.waitUntil(lambda: "_enter_canvas" not in widget.output.toPlainText())
     assert "enterEvent" in widget.output.toPlainText()
     widget._on_clear()
 
