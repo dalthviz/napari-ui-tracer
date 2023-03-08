@@ -58,13 +58,13 @@ class QtNapariUITracer(QWidget):
         group_box_layout.addWidget(self.cb_object_doc)
         self.cb_event_filter.setLayout(group_box_layout)
 
-        self.cb_debug_events = QGroupBox("Enable application events logging")
-        self.cb_debug_events.setCheckable(True)
-        self.cb_debug_events.setChecked(False)
-        self.cb_debug_events.setToolTip(
+        self.cb_log_events = QGroupBox("Enable application events logging")
+        self.cb_log_events.setCheckable(True)
+        self.cb_log_events.setChecked(False)
+        self.cb_log_events.setToolTip(
             "Show application events logging when active"
         )
-        self.cb_debug_events.toggled.connect(self._on_log_debug_events)
+        self.cb_log_events.toggled.connect(self._on_log_debug_events)
         # Stack depth
         self.label_stack_depth = QLabel("Stack depth:")
         self.sb_stack_depth = QSpinBox()
@@ -94,7 +94,7 @@ class QtNapariUITracer(QWidget):
         group_box_debug_events_layout.addWidget(
             self.sb_nesting_allowance, 1, 1
         )
-        self.cb_debug_events.setLayout(group_box_debug_events_layout)
+        self.cb_log_events.setLayout(group_box_debug_events_layout)
 
         # Buttons
         self.btn_clear = QPushButton("Clear output")
@@ -113,7 +113,7 @@ class QtNapariUITracer(QWidget):
         # Layout
         self.setLayout(QVBoxLayout())
         self.layout().addWidget(self.cb_event_filter)
-        self.layout().addWidget(self.cb_debug_events)
+        self.layout().addWidget(self.cb_log_events)
         self.layout().addLayout(btn_layout)
         self.layout().addWidget(self.output)
 
