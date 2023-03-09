@@ -1,6 +1,7 @@
 import sys
 
 import pytest
+from qtpy import QT5
 from qtpy.QtCore import Qt
 
 from napari_ui_tracer import QtNapariUITracer
@@ -58,7 +59,8 @@ def test_qt_event_filter(make_napari_viewer, qtbot):
 
 
 @pytest.mark.skipif(
-    sys.platform != "darwin", reason="Only works on macOS. See QTBUG-5232"
+    QT5 and sys.platform != "darwin",
+    reason="Only works on QT5 with macOS. See QTBUG-5232: https://bugreports.qt.io/browse/QTBUG-5232",
 )
 def test_application_events_logging(make_napari_viewer, qtbot):
     """

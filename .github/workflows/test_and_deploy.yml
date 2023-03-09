@@ -34,6 +34,7 @@ jobs:
       matrix:
         platform: [ubuntu-latest, windows-latest, macos-latest]
         python-version: [3.8, 3.9, "3.10"]
+        backend: [pyqt5, pyqt6]
 
     steps:
       - uses: actions/checkout@v3
@@ -71,6 +72,7 @@ jobs:
           run: python -m tox -vv
         env:
           PLATFORM: ${{ matrix.platform }}
+          BACKEND: ${{ matrix.backend }}
           PYVISTA_OFF_SCREEN: True
 
       - name: Coverage
