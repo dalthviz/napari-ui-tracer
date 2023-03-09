@@ -63,7 +63,8 @@ def test_qt_event_filter(make_napari_viewer, qtbot):
     reason="Only works on QT5 with macOS. See QTBUG-5232: https://bugreports.qt.io/browse/QTBUG-5232",
 )
 @pytest.mark.xfail(
-    reason="It could fail with a timeout due to the mouse movement not working (for example moving your mouse while the test is running)",
+    sys.platform.startswith("linux"),
+    reason="It could fail with a timeout due to the mouse movement not working (for example moving your mouse while the test is running) on Linux",
 )
 def test_application_events_logging(make_napari_viewer, qtbot):
     """
