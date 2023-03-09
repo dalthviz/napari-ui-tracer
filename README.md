@@ -42,13 +42,13 @@ To install latest development version :
     * Use `Ctrl/Cmd + Mouse button right click` to see the information available about any widget inside napari
     * An option to show objects documentation (object class docstring) can be used by checking the `Show object documentation` checkbox
 
-3. Check the `Enable application event logging` checkbox:
+3. Check the `Enable application events logging` checkbox:
     * A log like information with the events generated when interacting with the application will appear
     * Some configuration options are available:
         * `Stack depth`: Stack depth to show. Default to 20
         * `Allowed nested events`: How many sub-emit nesting levels to show (i.e. events that get triggered by other events). Default to 0
 
-4. If you want to explore the related module source file, click the link in the output section of the plugin
+4. If you want to explore the related wdget or evetn module source file, click the link in the output section of the plugin (the module file will open if you have a registered program to open such kind of file)
 
 ## Contributing
 

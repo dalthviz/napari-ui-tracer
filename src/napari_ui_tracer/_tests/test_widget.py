@@ -1,7 +1,7 @@
 import sys
 
 import pytest
-from qtpy import QT5, QT6
+from qtpy import QT5
 from qtpy.QtCore import Qt
 
 from napari_ui_tracer import QtNapariUITracer
