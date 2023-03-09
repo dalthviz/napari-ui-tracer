@@ -28,12 +28,13 @@ jobs:
       uses: pre-commit/action@v3.0.0
 
   test:
-    name: ${{ matrix.platform }} py${{ matrix.python-version }}
+    name: ${{ matrix.platform }} py${{ matrix.python-version }} ${{ matrix.backend }}
     runs-on: ${{ matrix.platform }}
     strategy:
       matrix:
         platform: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: [3.8, 3.9, "3.10"]
+        python-version: [3.8, "3.10"]
+        backend: [pyqt5, pyqt6]
 
     steps:
       - uses: actions/checkout@v3
@@ -71,10 +72,14 @@ jobs:
           run: python -m tox -vv
         env:
           PLATFORM: ${{ matrix.platform }}
+          BACKEND: ${{ matrix.backend }}
           PYVISTA_OFF_SCREEN: True
 
       - name: Coverage
-        uses: codecov/codecov-action@v1
+        uses: codecov/codecov-action@v3
+        with:
+            fail_ci_if_error: true
+            verbose: true
 
   deploy:
     # this will run when you have tagged a commit, starting with "v*"
