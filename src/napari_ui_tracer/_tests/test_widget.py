@@ -94,8 +94,8 @@ def test_application_events_logging(make_napari_viewer, qtbot):
     # set stack_depth to 1 and move mouse to viewer again
     widget.sb_stack_depth.setValue(1)
     qtbot.mouseMove(qt_viewer)
-    qtbot.waitUntil(lambda: "_enter_canvas" not in widget.output.toPlainText())
-    assert "enterEvent" in widget.output.toPlainText()
+    qtbot.waitUntil(lambda: "enterEvent" in widget.output.toPlainText())
+    assert "_enter_canvas" not in widget.output.toPlainText()
     widget._on_clear()
 
     # disable event logging
