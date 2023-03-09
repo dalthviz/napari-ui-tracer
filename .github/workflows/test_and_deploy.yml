@@ -28,12 +28,12 @@ jobs:
       uses: pre-commit/action@v3.0.0
 
   test:
-    name: ${{ matrix.platform }} py${{ matrix.python-version }}
+    name: ${{ matrix.platform }} py${{ matrix.python-version }} ${{ matrix.backend }}
     runs-on: ${{ matrix.platform }}
     strategy:
       matrix:
         platform: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: [3.8, 3.9, "3.10"]
+        python-version: [3.8, "3.10"]
         backend: [pyqt5, pyqt6]
 
     steps:

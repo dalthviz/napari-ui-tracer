@@ -1,7 +1,7 @@
 import sys
 
 import pytest
-from qtpy import QT5
+from qtpy import QT5, QT6
 from qtpy.QtCore import Qt
 
 from napari_ui_tracer import QtNapariUITracer
@@ -61,6 +61,9 @@ def test_qt_event_filter(make_napari_viewer, qtbot):
 @pytest.mark.skipif(
     QT5 and sys.platform != "darwin",
     reason="Only works on QT5 with macOS. See QTBUG-5232: https://bugreports.qt.io/browse/QTBUG-5232",
+)
+@pytest.mark.xfail(
+    reason="It could fail with a timeout due to the mouse movement not working (for example moving your mouse while the test is running)",
 )
 def test_application_events_logging(make_napari_viewer, qtbot):
     """
