@@ -17,7 +17,7 @@ This [napari] plugin was generated with [Cookiecutter] using [@napari]'s [cookie
 
 ## Installation
 
-You can install `napari-ui-tracer` via [pip] (**Not available yet**):
+You can install `napari-ui-tracer` via [pip]:
 
     pip install napari-ui-tracer
 
@@ -48,7 +48,7 @@ To install latest development version :
         * `Stack depth`: Stack depth to show. Default to 20
         * `Allowed nested events`: How many sub-emit nesting levels to show (i.e. events that get triggered by other events). Default to 0
 
-4. If you want to explore the related wdget or evetn module source file, click the link in the output section of the plugin (the module file will open if you have a registered program to open such kind of file)
+4. If you want to explore the related widget or event module source file, click the link in the output section of the plugin (the module file will open if you have a registered program to open such kind of file)
 
 ## Contributing
 
