@@ -1,8 +1,11 @@
 # napari-ui-tracer
 
 [![License MIT](https://img.shields.io/pypi/l/napari-ui-tracer.svg?color=green)](https://github.com/dalthviz/napari-ui-tracer/raw/main/LICENSE)
-[![PyPI](https://img.shields.io/pypi/v/napari-ui-tracer.svg?color=green)](https://pypi.org/project/napari-ui-tracer)
 [![Python Version](https://img.shields.io/pypi/pyversions/napari-ui-tracer.svg?color=green)](https://python.org)
+[![PyPI](https://img.shields.io/pypi/v/napari-ui-tracer.svg?color=green)](https://pypi.org/project/napari-ui-tracer)
+[![PyPI download month](https://img.shields.io/pypi/dm/napari-ui-tracer.svg?color=green)](https://pypi.org/project/napari-ui-tracer/)
+[![conda version](https://img.shields.io/conda/vn/conda-forge/napari-ui-tracer.svg?color=blue)](https://anaconda.org/conda-forge/napari-ui-tracer)
+[![conda download count](https://img.shields.io/conda/d/conda-forge/napari-ui-tracer.svg?color=blue)](https://anaconda.org/conda-forge/napari-ui-tracer)
 [![tests](https://github.com/dalthviz/napari-ui-tracer/workflows/tests/badge.svg)](https://github.com/dalthviz/napari-ui-tracer/actions)
 [![codecov](https://codecov.io/gh/dalthviz/napari-ui-tracer/branch/main/graph/badge.svg?token=E6je6vXOSA)](https://codecov.io/gh/dalthviz/napari-ui-tracer)
 [![napari hub](https://img.shields.io/endpoint?url=https://api.napari-hub.org/shields/napari-ui-tracer)](https://napari-hub.org/plugins/napari-ui-tracer)
@@ -21,12 +24,13 @@ You can install `napari-ui-tracer` via [pip]:
 
     pip install napari-ui-tracer
 
+Or via [conda]:
 
+    conda install -c conda-forge napari-ui-tracer
 
 To install latest development version :
 
     pip install git+https://github.com/dalthviz/napari-ui-tracer.git
-
 
 ## Usage
 
@@ -81,3 +85,4 @@ If you encounter any problems, please [file an issue] along with a detailed desc
 [tox]: https://tox.readthedocs.io/en/latest/
 [pip]: https://pypi.org/project/pip/
 [PyPI]: https://pypi.org/
+[conda]: https://docs.conda.io/projects/conda/en/stable/
