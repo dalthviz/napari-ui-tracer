@@ -2,7 +2,8 @@
 Widget to show information of the Napari widgets classes and module location.
 
 Uses `Ctrl + Mouse right button press`/`Cmd + Mouse right button press`
-to trigger the tracing when the event filter is installed.
+to trigger the tracing when the Qt event filter is enabled and logging events
+information if the application events logging is enabled.
 """
 # Standard library imports
 import inspect
@@ -175,7 +176,7 @@ class QtNapariUITracer(QWidget):
                 if "self" in frame.frame.f_locals:
                     obj = type(frame.frame.f_locals["self"]).__name__ + "."
                 if obj:
-                    ln = f'  <a href="{frame.filename}">"{fname}", line {frame.lineno}, in {obj}{frame.function}</a>'
+                    ln = f'  <a href="file:///{frame.filename}">"{fname}", line {frame.lineno}, in {obj}{frame.function}</a>'
                     lines.append(ln)
             lines.append("")
 
